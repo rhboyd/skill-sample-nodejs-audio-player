@@ -5,6 +5,16 @@ var constants = require('./constants');
 var feeds = require('./feeds');
 var request = require('sync-request');
 var audioData = null;
+/*
+var audioData = [
+    {title:"USA gro\u017c\u0105 zredukowaniem wsparcia dla partner\u00f3w z NATO, je\u015bli ci nie zwi\u0119ksz\u0105 do ko\u0144ca roku wydatk\u00f3w na obronno\u015b\u0107.",
+     url:"https://s3.amazonaws.com/polyglot-news/polish/ac70e68d-3a2f-46a3-b9ae-cb4e07f06935.mp3"},
+    {title:"General Motors i francuski koncern PSA Peugeot Citroen prowadz\u0105 rozmowy nt. przej\u0119cia Opla \u2013 potwierdzi\u0142 rzecznik GM w Detroit.", 
+    url:"https://s3.amazonaws.com/polyglot-news/polish/02a5c8e0-dc4f-4c85-a278-b8e6c8f33ab1.mp3"},
+    {title:"\u201eLausitzer Rundschau\u201d donosi o uj\u0119ciu polskiej szajki, kt\u00f3ra dopuszcza\u0142a si\u0119 kradzie\u017cy paneli s\u0142onecznych w Niemczech wschodnich i w Bawarii.", 
+    url:"https://s3.amazonaws.com/polyglot-news/polish/41c50274-80ee-4181-b97b-0ffb8b0a99b9.mp3"}
+    ];
+*/
 
 function getRSSEntries(rss){
     var req = request("GET", rss)
@@ -20,14 +30,17 @@ function getRSSEntries(rss){
 exports.handler = function(event, context, callback){
     var alexa = Alexa.handler(event, context);
     alexa.appId = constants.appId;
+    alexa.dynamoDBTableName = constants.dynamoDBTableName;
     if(event.request.intent){
-        var intent = event.request.intent;
-        var languageSlot = intent.slots.Language,
-        languageName;    
+        if(event.request.intent.slots){
+            var intent = event.request.intent;
+            var languageSlot = intent.slots.Language,
+            languageName;
+        }
     }
     if (languageSlot && languageSlot.value){
         languageName = languageSlot.value.toLowerCase();
-        audioData = getRSSEntries(feeds[languageName])
+        //audioData = getRSSEntries(feeds[languageName])
         console.log(audioData)
     }
     
@@ -49,7 +62,7 @@ var stateHandlers = {
          */
         'LaunchRequest' : function () {
             // Initialize Attributes
-            //this.attributes['playOrder'] = Array.apply(null, {length: audioData.length}).map(Number.call, Number);
+            this.attributes['playOrder'] = Array.apply(null, {length: audioData.length}).map(Number.call, Number);
             this.attributes['index'] = 0;
             this.attributes['offsetInMilliseconds'] = 0;
             this.attributes['loop'] = true;
@@ -58,8 +71,8 @@ var stateHandlers = {
             //  Change state to START_MODE
             this.handler.state = constants.states.START_MODE;
 
-            var message = 'Welcome to the News Reader. You can say, play the news in Polish to begin.';
-            var reprompt = 'You can say, play the news in Polish, to begin.';
+            var message = 'Welcome to the News Reader. You can say, tell me the news in Polish to begin.';
+            var reprompt = 'You can say, tell me the news in Polish, to begin.';
 
             this.response.speak(message).listen(reprompt);
             this.emit(':responseReady');
@@ -96,8 +109,9 @@ var stateHandlers = {
         'SessionEndedRequest' : function () {
             // No session ended logic
         },
+        'AMAZON.NextIntent' : function () { controller.playNext.call(this) },
         'Unhandled' : function () {
-            var message = 'Sorry, I could not understand. Please say the language you would like to use to begin the audio.';
+            var message = 'Sorry, I could not understand (START MODE). Please say the language you would like to use to begin the audio.';
             this.response.speak(message).listen(message);
             this.emit(':responseReady');
         }
@@ -155,7 +169,7 @@ var stateHandlers = {
             // No session ended logic
         },
         'Unhandled' : function () {
-            var message = 'Sorry, I could not understand. You can say, Next or Previous to navigate through the playlist.';
+            var message = 'Sorry, I could not understand (PLAY MODE). You can say, Next or Previous to navigate through the playlist.';
             this.response.speak(message).listen(message);
             this.emit(':responseReady');
         }
