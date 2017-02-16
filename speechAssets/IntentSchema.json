@@ -1,37 +1,28 @@
 {
-  "intents": [
-    {
-      "intent": "PlayAudio"
-    },
-    {
-      "intent": "AMAZON.PauseIntent"
-    },
-    {
-      "intent": "AMAZON.ResumeIntent"
-    },
-    {
-      "intent": "AMAZON.NextIntent"
-    },
-    {
-      "intent": "AMAZON.PreviousIntent"
-    },
-    {
-      "intent": "AMAZON.HelpIntent"
-    },
-    {
-      "intent": "AMAZON.StopIntent"
-    },
-    {
-      "intent": "AMAZON.CancelIntent"
-    },
-    {
-      "intent": "AMAZON.StartOverIntent"
-    },
-    {
-      "intent": "AMAZON.YesIntent"
-    },
-    {
-      "intent": "AMAZON.NoIntent"
-    }
-  ]
+    "intents": [
+        {
+            "intent": "AMAZON.ResumeIntent"
+        },
+        {
+            "intent": "AMAZON.PauseIntent"
+        },
+        {
+            "intent": "GetNewsIntent",
+            "slots": [
+                {
+                    "name": "Language",
+                    "type": "LIST_OF_LANGUAGES"
+                }
+            ]
+        },
+        {
+            "intent": "AMAZON.HelpIntent"
+        },
+        {
+            "intent": "AMAZON.StopIntent"
+        },
+        {
+            "intent": "AMAZON.CancelIntent"
+        }
+    ]
 }
