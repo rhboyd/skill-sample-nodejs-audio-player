@@ -1,12 +1,6 @@
 {
     "intents": [
         {
-            "intent": "AMAZON.ResumeIntent"
-        },
-        {
-            "intent": "AMAZON.PauseIntent"
-        },
-        {
             "intent": "GetNewsIntent",
             "slots": [
                 {
@@ -15,14 +9,35 @@
                 }
             ]
         },
-        {
-            "intent": "AMAZON.HelpIntent"
-        },
-        {
-            "intent": "AMAZON.StopIntent"
-        },
-        {
-            "intent": "AMAZON.CancelIntent"
-        }
-    ]
+    {
+      "intent": "AMAZON.PauseIntent"
+    },
+    {
+      "intent": "AMAZON.ResumeIntent"
+    },
+    {
+      "intent": "AMAZON.NextIntent"
+    },
+    {
+      "intent": "AMAZON.PreviousIntent"
+    },
+    {
+      "intent": "AMAZON.HelpIntent"
+    },
+    {
+      "intent": "AMAZON.StopIntent"
+    },
+    {
+      "intent": "AMAZON.CancelIntent"
+    },
+    {
+      "intent": "AMAZON.StartOverIntent"
+    },
+    {
+      "intent": "AMAZON.YesIntent"
+    },
+    {
+      "intent": "AMAZON.NoIntent"
+    }
+  ]
 }
