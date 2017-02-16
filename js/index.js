@@ -5,6 +5,7 @@ var constants = require('./constants');
 var feeds = require('./feeds');
 var request = require('sync-request');
 var audioData = null;
+
 /*
 var audioData = [
     {title:"USA gro\u017c\u0105 zredukowaniem wsparcia dla partner\u00f3w z NATO, je\u015bli ci nie zwi\u0119ksz\u0105 do ko\u0144ca roku wydatk\u00f3w na obronno\u015b\u0107.",
