@@ -6,7 +6,7 @@ The Alexa Skills Kit now allows developers to build skills that play long-form a
 
 1. Clone the project and package the skill:
 ```bash
-git clone https://github.com/alexa/skill-sample-nodejs-audio-player.git
+git clone https://github.com/rhboyd/skill-sample-nodejs-audio-player.git
 cd skill-sample-nodejs-audio-player/js
 npm install
 zip -r ../audio-player.zip *
