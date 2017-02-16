@@ -72,7 +72,9 @@ exports.handler = function(event, context, callback){
       }
 
     });
-    while(!shouldContinue)
+    while(!shouldContinue){
+        sleep(1);
+    }
         //RSSData = getRSSEntries(feeds[languageName])
         //audioData = RSSData
         audioData = getRSSEntries(feeds[languageName])
