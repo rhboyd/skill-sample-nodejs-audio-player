@@ -1,9 +1,13 @@
 'use strict';
 
 var Alexa = require('alexa-sdk');
+var aws = require('aws-sdk');
+var sleep = require('sleep');
+var request = require('sync-request');
 var constants = require('./constants');
 var feeds = require('./feeds');
-var request = require('sync-request');
+var shouldContinue = false;
+
 var audioData = null;
 
 /*
@@ -43,6 +47,36 @@ exports.handler = function(event, context, callback){
         languageName = languageSlot.value.toLowerCase();
         //audioData = getRSSEntries(feeds[languageName])
         console.log(audioData)
+    }
+    
+    var lambda1 = new aws.Lambda({
+      region: 'eu-west-1'
+    });
+
+    lambda1.invoke({
+      FunctionName: 'GetNewsHeadlines',
+      Payload: JSON.stringify({lang: "pl"})
+    }, function(error, data) {
+      console.log(error);
+      console.log(data);
+      if (error) {
+        console.log("An error");
+        console.log(error);
+        context.done('error', error);
+      }
+      if(data.Payload){
+       console.log(data.Payload);
+       context.succeed(data.Payload);
+       // save the data.Payload to some variable
+       shouldContinue = true;
+      }
+
+    });
+    while(!shouldContinue)
+        //RSSData = getRSSEntries(feeds[languageName])
+        //audioData = RSSData
+        audioData = getRSSEntries(feeds[languageName])
+//        console.log(audioData)
     }
     
     alexa.registerHandlers(
