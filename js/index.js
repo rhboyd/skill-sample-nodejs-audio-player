@@ -2,15 +2,15 @@
 
 var Alexa = require('alexa-sdk');
 var aws = require('aws-sdk');
-var sleep = require('sleep');
 var request = require('sync-request');
 var constants = require('./constants');
 var feeds = require('./feeds');
+var s3 = new aws.S3();
 var shouldContinue = false;
 
-var audioData = null;
+//var audioData = null;
 
-/*
+
 var audioData = [
     {title:"USA gro\u017c\u0105 zredukowaniem wsparcia dla partner\u00f3w z NATO, je\u015bli ci nie zwi\u0119ksz\u0105 do ko\u0144ca roku wydatk\u00f3w na obronno\u015b\u0107.",
      url:"https://s3.amazonaws.com/polyglot-news/polish/ac70e68d-3a2f-46a3-b9ae-cb4e07f06935.mp3"},
@@ -19,14 +19,15 @@ var audioData = [
     {title:"\u201eLausitzer Rundschau\u201d donosi o uj\u0119ciu polskiej szajki, kt\u00f3ra dopuszcza\u0142a si\u0119 kradzie\u017cy paneli s\u0142onecznych w Niemczech wschodnich i w Bawarii.", 
     url:"https://s3.amazonaws.com/polyglot-news/polish/41c50274-80ee-4181-b97b-0ffb8b0a99b9.mp3"}
     ];
-*/
+
 
 function getRSSEntries(rss){
-    var req = request("GET", rss)
+    var apiURL = "https://o4h768v687.execute-api.us-east-1.amazonaws.com/prod/?bucket=" + rss
+    var req = request("GET", apiURL)
     var Response = JSON.parse(req.body.toString('utf-8'))
     var tracks = [];
     for(var i=0; i<Response.length; i++){
-        var entry = {title: Response[i]["titleText"], url: Response[i]["streamUrl"]};
+        var entry = {title: Response[i]["title"], url: Response[i]["url"]};
         tracks.push(entry)
     }
     return tracks;
@@ -45,42 +46,10 @@ exports.handler = function(event, context, callback){
     }
     if (languageSlot && languageSlot.value){
         languageName = languageSlot.value.toLowerCase();
-        //audioData = getRSSEntries(feeds[languageName])
+        audioData = getRSSEntries(feeds[languageName])
         console.log(audioData)
     }
-    
-    var lambda1 = new aws.Lambda({
-      region: 'eu-west-1'
-    });
-
-    lambda1.invoke({
-      FunctionName: 'GetNewsHeadlines',
-      Payload: JSON.stringify({lang: "pl"})
-    }, function(error, data) {
-      console.log(error);
-      console.log(data);
-      if (error) {
-        console.log("An error");
-        console.log(error);
-        context.done('error', error);
-      }
-      if(data.Payload){
-       console.log(data.Payload);
-       context.succeed(data.Payload);
-       // save the data.Payload to some variable
-       shouldContinue = true;
-      }
-
-    });
-    while(!shouldContinue){
-        sleep(1);
-    }
-        //RSSData = getRSSEntries(feeds[languageName])
-        //audioData = RSSData
-        audioData = getRSSEntries(feeds[languageName])
-//        console.log(audioData)
-    }
-    
+   
     alexa.registerHandlers(
         stateHandlers.startModeIntentHandlers,
         stateHandlers.playModeIntentHandlers,

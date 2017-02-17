@@ -9,21 +9,21 @@
 */
 
 module.exports = {
-    "polish": "http://pollytest.nuit.pl/",
-    "english": "http://pollytest.nuit.en/",
-    "danish": "http://pollytest.nuit.da/",
-    "dutch": "http://pollytest.nuit.nl/",
-    "french": "http://pollytest.nuit.fr/",
-    "german": "http://pollytest.nuit.de/",
+    "polish": "polyglot-news-pl",
+    "english": "polyglot-news-en",
+    "french": "polyglot-news-fr",
+    "german": "polyglot-news-de",
+    "romanian": "polyglot-news-ro/",
+    "russian": "polyglot-news-ru/",
+    "spanish": "polyglot-news-es",
+    "turkish": "polyglot-news-tr",
     "icelandic": "http://pollytest.nuit.is/",
     "italian": "http://pollytest.nuit.it/",
     "japanese": "http://pollytest.nuit.ja/",
     "norwegian": "http://pollytest.nuit.nb/",
     "portuguese": "http://pollytest.nuit.pt/",
-    "romanian": "http://pollytest.nuit.ro/",
-    "russian": "http://pollytest.nuit.ru/",
-    "spanish": "http://pollytest.nuit.es/",
+    "welsh": "http://pollytest.nuit.cy/",
     "swedish": "http://pollytest.nuit.sv/",
-    "turkish": "http://pollytest.nuit.tr/",
-    "welsh": "http://pollytest.nuit.cy/"
+    "danish": "http://pollytest.nuit.da/",
+    "dutch": "http://pollytest.nuit.nl/"
 };
