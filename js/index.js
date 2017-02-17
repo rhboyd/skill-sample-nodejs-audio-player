@@ -8,21 +8,11 @@ var feeds = require('./feeds');
 var s3 = new aws.S3();
 var shouldContinue = false;
 
-//var audioData = null;
+var audioData = null;
+var languageISO = null
 
-
-var audioData = [
-    {title:"USA gro\u017c\u0105 zredukowaniem wsparcia dla partner\u00f3w z NATO, je\u015bli ci nie zwi\u0119ksz\u0105 do ko\u0144ca roku wydatk\u00f3w na obronno\u015b\u0107.",
-     url:"https://s3.amazonaws.com/polyglot-news/polish/ac70e68d-3a2f-46a3-b9ae-cb4e07f06935.mp3"},
-    {title:"General Motors i francuski koncern PSA Peugeot Citroen prowadz\u0105 rozmowy nt. przej\u0119cia Opla \u2013 potwierdzi\u0142 rzecznik GM w Detroit.", 
-    url:"https://s3.amazonaws.com/polyglot-news/polish/02a5c8e0-dc4f-4c85-a278-b8e6c8f33ab1.mp3"},
-    {title:"\u201eLausitzer Rundschau\u201d donosi o uj\u0119ciu polskiej szajki, kt\u00f3ra dopuszcza\u0142a si\u0119 kradzie\u017cy paneli s\u0142onecznych w Niemczech wschodnich i w Bawarii.", 
-    url:"https://s3.amazonaws.com/polyglot-news/polish/41c50274-80ee-4181-b97b-0ffb8b0a99b9.mp3"}
-    ];
-
-
-function getRSSEntries(rss){
-    var apiURL = "https://o4h768v687.execute-api.us-east-1.amazonaws.com/prod/?bucket=" + rss
+function getRSSEntries(){
+    var apiURL = "https://o4h768v687.execute-api.us-east-1.amazonaws.com/prod/?bucket=" + languageISO
     var req = request("GET", apiURL)
     var Response = JSON.parse(req.body.toString('utf-8'))
     var tracks = [];
@@ -35,6 +25,7 @@ function getRSSEntries(rss){
 
 exports.handler = function(event, context, callback){
     var alexa = Alexa.handler(event, context);
+    var utcDate = new Date().getTime()
     alexa.appId = constants.appId;
     alexa.dynamoDBTableName = constants.dynamoDBTableName;
     if(event.request.intent){
@@ -46,7 +37,8 @@ exports.handler = function(event, context, callback){
     }
     if (languageSlot && languageSlot.value){
         languageName = languageSlot.value.toLowerCase();
-        audioData = getRSSEntries(feeds[languageName])
+        languageISO = feeds[languageName];
+        audioData = getRSSEntries()
         console.log(audioData)
     }
    
@@ -68,7 +60,9 @@ var stateHandlers = {
          */
         'LaunchRequest' : function () {
             // Initialize Attributes
+            audioData = getRSSEntries();
             this.attributes['playOrder'] = Array.apply(null, {length: audioData.length}).map(Number.call, Number);
+            this.attributes['language'] = languageISO;
             this.attributes['index'] = 0;
             this.attributes['offsetInMilliseconds'] = 0;
             this.attributes['loop'] = true;
@@ -84,8 +78,8 @@ var stateHandlers = {
             this.emit(':responseReady');
         },
         'GetNewsIntent' : function () {
-            if (!this.attributes['playOrder']) {
                 // Initialize Attributes if undefined.
+                audioData = getRSSEntries();
                 this.attributes['playOrder'] = Array.apply(null, {length: audioData.length}).map(Number.call, Number);
                 this.attributes['index'] = 0;
                 this.attributes['offsetInMilliseconds'] = 0;
@@ -94,8 +88,7 @@ var stateHandlers = {
                 this.attributes['playbackIndexChanged'] = true;
                 //  Change state to START_MODE
                 this.handler.state = constants.states.START_MODE;
-            }
-            controller.play.call(this);
+                controller.play.call(this);
         },
         'AMAZON.HelpIntent' : function () {
             var message = 'Welcome to the News Reader. You can say, play the news in Polish to begin.';
@@ -127,32 +120,36 @@ var stateHandlers = {
          *  All Intent Handlers for state : PLAY_MODE
          */
         'LaunchRequest' : function () {
-            /*
-             *  Session resumed in PLAY_MODE STATE.
-             *  If playback had finished during last session :
-             *      Give welcome message.
-             *      Change state to START_STATE to restrict user inputs.
-             *  Else :
-             *      Ask user if he/she wants to resume from last position.
-             *      Change state to RESUME_DECISION_MODE
-             */
-            var message;
-            var reprompt;
-            if (this.attributes['playbackFinished']) {
-                this.handler.state = constants.states.START_MODE;
-                message = 'Welcome to the News Reader. You can say, play the news in Polish to begin.';
-                reprompt = 'You can say, play the news in Polish, to begin.';
-            } else {
-                this.handler.state = constants.states.RESUME_DECISION_MODE;
-                message = 'You were listening to ' + audioData[this.attributes['playOrder'][this.attributes['index']]].title +
-                    ' Would you like to resume?';
-                reprompt = 'You can say yes to resume or no to play from the top.';
-            }
+            audioData = getRSSEntries();
+            this.attributes['playOrder'] = Array.apply(null, {length: audioData.length}).map(Number.call, Number);
+            this.attributes['language'] = languageISO;
+            this.attributes['index'] = 0;
+            this.attributes['offsetInMilliseconds'] = 0;
+            this.attributes['loop'] = true;
+            this.attributes['shuffle'] = false;
+            this.attributes['playbackIndexChanged'] = true;
+            //  Change state to START_MODE
+            this.handler.state = constants.states.START_MODE;
+
+            var message = 'Welcome to the News Reader. You can say, tell me the news in Polish to begin.';
+            var reprompt = 'You can say, tell me the news in Polish, to begin.';
 
             this.response.speak(message).listen(reprompt);
             this.emit(':responseReady');
         },
-        'GetNewsIntent' : function () { controller.play.call(this) },
+        'GetNewsIntent' : function () {
+                // Initialize Attributes if undefined.
+                audioData = getRSSEntries();
+                this.attributes['playOrder'] = Array.apply(null, {length: audioData.length}).map(Number.call, Number);
+                this.attributes['index'] = 0;
+                this.attributes['offsetInMilliseconds'] = 0;
+                this.attributes['loop'] = true;
+                this.attributes['shuffle'] = false;
+                this.attributes['playbackIndexChanged'] = true;
+                //  Change state to START_MODE
+                this.handler.state = constants.states.START_MODE;
+                controller.play.call(this);
+        },
         'AMAZON.NextIntent' : function () { controller.playNext.call(this) },
         'AMAZON.PreviousIntent' : function () { controller.playPrevious.call(this) },
         'AMAZON.PauseIntent' : function () { controller.stop.call(this) },
@@ -248,7 +245,9 @@ var controller = function () {
                 this.attributes['playbackIndexChanged'] = true;
                 this.attributes['playbackFinished'] = false;
             }
-
+            
+            this.attributes['playOrder'] = Array.apply(null, {length: audioData.length}).map(Number.call, Number);
+            
             var token = String(this.attributes['playOrder'][this.attributes['index']]);
             var playBehavior = 'REPLACE_ALL';
             var podcast = audioData[this.attributes['playOrder'][this.attributes['index']]];
@@ -271,6 +270,7 @@ var controller = function () {
              *  Issuing AudioPlayer.Stop directive to stop the audio.
              *  Attributes already stored when AudioPlayer.Stopped request received.
              */
+            this.handler.state = constants.states.START_MODE;
             this.response.audioPlayerStop();
             this.emit(':responseReady');
         },
